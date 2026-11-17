@@ -13,6 +13,7 @@
     :root {
       --green: #22c55e;
       --green-dark: #16a34a;
+      --brand: #2B90CC;
       --purple: #7B2CBF;
       --purple-dark: #5A189A;
       --border: #e5e7eb;
@@ -57,7 +58,7 @@
       font-weight: 800;
       line-height: 1;
       letter-spacing: -0.02em;
-      color: #2B90CC;
+      color: var(--brand);
       white-space: nowrap;
     }
     .loc-label {
@@ -527,10 +528,18 @@
       z-index: 3;
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 8px;
       padding: 10px 14px;
       background: rgba(248, 250, 252, .96);
       border-bottom: 1px solid var(--border);
+    }
+    .detail-actions {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
     }
     .detail-map { display: none; }
     .detail-inner { padding: 12px 14px 32px; }
@@ -1073,6 +1082,371 @@
     }
     .building-hover.pinned .bh-close { display: block; }
 
+    /* —— Hearts, shortlist drawer, shared shortlist —— */
+    .btn-shortlist {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-shortlist svg,
+    .heart-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linejoin: round;
+    }
+    .sl-count {
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: var(--brand);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 18px;
+      text-align: center;
+    }
+    .sl-count[hidden] { display: none !important; }
+    .heart-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 3;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 1px 3px rgba(0,0,0,.22);
+      color: #6b7280;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 0;
+    }
+    .heart-btn:hover { color: #be123c; }
+    .heart-btn.on { color: #e11d48; }
+    .heart-btn.on svg { fill: currentColor; stroke: currentColor; }
+    .detail-heart {
+      position: static;
+      width: auto;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      box-shadow: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .detail-heart.on {
+      color: #be123c;
+      border-color: #fecdd3;
+      background: #fff1f2;
+    }
+    .btn-brand {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+    .btn-brand:hover { background: #217aaf; color: #fff; }
+    .btn-brand:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+    .sl-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(17, 24, 39, .38);
+    }
+    .sl-backdrop[hidden] { display: none !important; }
+    .sl-drawer {
+      position: fixed;
+      z-index: 61;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(420px, 100%);
+      background: #fff;
+      box-shadow: -8px 0 32px rgba(0,0,0,.16);
+      display: flex;
+      flex-direction: column;
+    }
+    .sl-drawer[hidden] { display: none !important; }
+    .sl-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sl-head h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+    .sl-close {
+      margin-left: auto;
+      width: 36px;
+      padding: 0;
+      font-size: 20px;
+      line-height: 1;
+    }
+    .sl-body {
+      flex: 1;
+      overflow: auto;
+      padding: 8px 14px 24px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .sl-empty {
+      margin: 8px 0 16px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .sl-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .sl-open {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      border: none;
+      background: none;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+    .sl-open .sl-title,
+    .sl-open .sl-meta,
+    .sl-open .sl-rent { display: block; }
+    .sl-photo {
+      width: 72px;
+      height: 56px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #e5e7eb;
+      position: relative;
+    }
+    .sl-photo img,
+    .sl-photo .placeholder {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .sl-photo .placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      font-size: 10px;
+    }
+    .sl-title {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sl-meta {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sl-rent {
+      margin-top: 2px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green-dark);
+    }
+    .sl-rent.high { color: var(--purple); }
+    .sl-rent.unset { color: var(--muted); font-weight: 600; }
+    .sl-ops {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sl-ops button {
+      width: 28px;
+      height: 26px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      line-height: 1;
+      color: #374151;
+      padding: 0;
+    }
+    .sl-ops button:hover { background: #f3f4f6; }
+    .sl-ops button:disabled { opacity: .35; cursor: not-allowed; }
+    .agent-form {
+      margin-top: 16px;
+      padding-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .agent-form h3 {
+      margin: 0 0 2px;
+      font-size: 14px;
+    }
+    .agent-form label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 650;
+      color: #374151;
+    }
+    .agent-form input,
+    .agent-form textarea {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .agent-form input:focus,
+    .agent-form textarea:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(43,144,204,.18);
+    }
+    .agent-form textarea { resize: vertical; min-height: 58px; }
+    .agent-form .btn-brand { margin-top: 4px; }
+    .sl-hint {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+    .sl-url {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 12px;
+      color: #374151;
+      background: #f8fafc;
+    }
+    .sl-url[hidden] { display: none !important; }
+    .loc-shortlist { display: none; }
+    html.mode-shortlist .filters,
+    html.mode-shortlist .btn-shortlist,
+    html.mode-shortlist .map-controls { display: none !important; }
+    html.mode-shortlist .loc-areas { display: none; }
+    html.mode-shortlist .loc-label::before { content: none; }
+    html.mode-shortlist .loc-shortlist {
+      display: inline;
+      font-family: "Nunito", ui-rounded, "Arial Rounded MT Bold", "Segoe UI", system-ui, sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      color: var(--brand);
+    }
+    .client-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .client-kicker {
+      margin: 0;
+      font-family: "Nunito", ui-rounded, "Arial Rounded MT Bold", "Segoe UI", system-ui, sans-serif;
+      font-weight: 800;
+      font-size: 26px;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--brand);
+    }
+    .client-by {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: #374151;
+    }
+    .client-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .btn-line,
+    .btn-call {
+      display: inline-flex;
+      align-items: center;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid transparent;
+    }
+    .btn-line { background: #06C755; color: #fff; }
+    .btn-line:hover { background: #05b34c; }
+    .btn-call { background: var(--brand); color: #fff; }
+    .btn-call:hover { background: #217aaf; }
+    .client-note {
+      margin: 12px 0 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #1f2937;
+      white-space: pre-wrap;
+    }
+    .client-missing {
+      margin: 10px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .toast {
+      position: fixed;
+      z-index: 70;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      background: #111827;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 650;
+      box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    }
+    .toast[hidden] { display: none !important; }
+
     /* —— Mobile toggle —— */
     .mobile-toggle {
       display: none;
@@ -1116,17 +1490,31 @@
       .detail-map { display: inline-flex; align-items: center; }
       .building-hover .bh-photo { height: 120px; }
       .line-legend { font-size: 10px; gap: 2px 8px; bottom: 44px; }
+      .detail-actions { margin-left: 0; width: 100%; }
+      .client-kicker { font-size: 22px; }
+      .toast { bottom: 72px; }
     }
     @media (max-width: 480px) {
       .card { grid-template-columns: 1fr; }
       .card-photo { min-height: 160px; height: 160px; }
     }
   </style>
+  <script>
+    (function () {
+      var sl = new URLSearchParams(location.search).get("sl");
+      if (sl && sl.trim()) document.documentElement.classList.add("mode-shortlist");
+    })();
+  </script>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-row1">
       <h1>Roomie</h1>
+      <button type="button" class="btn btn-shortlist" id="shortlistBtn" aria-haspopup="dialog" aria-controls="shortlistDrawer" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.7-4.4-9.3-8.2C.7 10 1.2 6.4 4.1 5 6.2 4 8.5 4.6 12 7.8 15.5 4.6 17.8 4 19.9 5c2.9 1.4 3.4 5 1.4 7.8C18.7 16.6 12 21 12 21z"/></svg>
+        Shortlist
+        <span class="sl-count" id="shortlistCount" hidden>0</span>
+      </button>
       <p class="loc-label">
         <span class="loc-areas">
           <span>Sukhumvit (Nana–Bearing)</span>
@@ -1143,6 +1531,7 @@
           <span>Riverside</span>
           <span>Chao Phraya Riverside</span>
         </span>
+        <span class="loc-shortlist">Shortlist for you</span>
       </p>
       <p class="osm-note">Buildings and rail lines © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, ODbL</p>
     </div>
@@ -1238,6 +1627,36 @@
     <button type="button" class="btn" id="btnMap" data-view="map">Map</button>
   </nav>
 
+  <div id="slBackdrop" class="sl-backdrop" hidden></div>
+  <aside id="shortlistDrawer" class="sl-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="slTitle">
+    <div class="sl-head">
+      <h2 id="slTitle">Shortlist</h2>
+      <button type="button" class="btn sl-close" id="slClose" aria-label="Close shortlist">×</button>
+    </div>
+    <div class="sl-body">
+      <div id="slRows"></div>
+      <form id="agentForm" class="agent-form" autocomplete="on">
+        <h3>Share shortlist</h3>
+        <p class="sl-hint">Clients see these homes and your contact. The listing’s own contact stays hidden on the shared link.</p>
+        <label>Your name
+          <input id="agentName" name="name" maxlength="60" autocomplete="name" placeholder="Agent name">
+        </label>
+        <label>LINE id
+          <input id="agentLine" name="line" maxlength="40" autocapitalize="off" spellcheck="false" placeholder="@yourline">
+        </label>
+        <label>Phone
+          <input id="agentPhone" name="phone" maxlength="24" inputmode="tel" autocomplete="tel" placeholder="08x xxx xxxx">
+        </label>
+        <label>Note
+          <textarea id="agentNote" name="note" maxlength="160" rows="2" placeholder="A short note for your client"></textarea>
+        </label>
+        <button type="submit" class="btn btn-brand" id="shareShortlist" disabled>Share shortlist</button>
+        <input id="slUrl" class="sl-url" readonly hidden aria-label="Shortlist link">
+      </form>
+    </div>
+  </aside>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
   <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Photo gallery">
     <button type="button" class="lb-close" id="lbClose" aria-label="Close photos">×</button>
     <button type="button" class="lb-nav prev" id="lbPrev" aria-label="Previous photo">‹</button>
@@ -1254,6 +1673,67 @@
   const EMPTY_ZOOM = 16;
   // A listing at or above this monthly rent uses the purple pin and price accent.
   const HIGH_RENT_THB = 100000;
+  const SHORTLIST_KEY = "roomie.shortlist.v1";
+  const AGENT_KEY = "roomie.agent.v1";
+
+  // Deep link: ?listing=<id> or #/l/<id> (full id or compact id).
+  // Shared shortlist: ?sl=<compact ids>&ag=&ln=&ph=&nt=
+  // Compact id: trailing 6+ digits, otherwise "x" + base36 FNV-1a of the full id.
+  function listingTokenFromLocation() {
+    const q = new URLSearchParams(location.search).get("listing");
+    if (q && q.trim()) return q.trim();
+    const hashMatch = (location.hash || "").match(/^#\/l\/([^?#]+)$/);
+    return hashMatch ? decodeURIComponent(hashMatch[1]).trim() : "";
+  }
+
+  const initialParams = new URLSearchParams(location.search);
+  const initialSl = (initialParams.get("sl") || "").trim();
+  let shortlistMode = initialSl.length > 0;
+  let shortlistTokens = shortlistMode ? initialSl.split(",").map((s) => s.trim()).filter(Boolean) : [];
+  let sharedAgent = {
+    name: initialParams.get("ag") || "",
+    line: initialParams.get("ln") || "",
+    phone: initialParams.get("ph") || "",
+    note: initialParams.get("nt") || "",
+  };
+  let shortlistOrder = [];
+  let shortlistMissing = 0;
+  let pendingListingToken = listingTokenFromLocation();
+
+  function compactId(id) {
+    const tail = String(id).match(/(\d{6,})$/);
+    if (tail) return tail[1];
+    let hash = 2166136261;
+    for (let i = 0; i < id.length; i++) {
+      hash ^= id.charCodeAt(i);
+      hash = Math.imul(hash, 16777619) >>> 0;
+    }
+    return "x" + hash.toString(36);
+  }
+
+  function resolveToken(token) {
+    if (!token) return null;
+    const exact = allListings.find((l) => l.id === token);
+    if (exact) return exact;
+    const hits = allListings.filter((l) => compactId(l.id) === token);
+    return hits.length === 1 ? hits[0] : null;
+  }
+
+  function resolvedShortlist() {
+    const out = [];
+    const seen = new Set();
+    shortlistMissing = 0;
+    shortlistTokens.forEach((token) => {
+      const listing = resolveToken(token);
+      if (!listing || seen.has(listing.id)) {
+        if (!listing) shortlistMissing += 1;
+        return;
+      }
+      seen.add(listing.id);
+      out.push(listing);
+    });
+    return out;
+  }
 
   function isHighRent(l) {
     if (!l || l.price_thb == null) return false;
@@ -1412,6 +1892,10 @@
   function renderHeader(areas) {
     const locAreas = document.querySelector(".loc-areas");
     if (!locAreas) return;
+    if (shortlistMode) {
+      document.title = "Shortlist for you — Roomie";
+      return;
+    }
     const suk = areas.filter((area) => area && area.corridor === "sukhumvit");
     if (!suk.length) return;
     const labels = [`Sukhumvit (${suk[0].name}–${suk[suk.length - 1].name})`];
@@ -1482,6 +1966,18 @@
     bhLocality: document.getElementById("bhLocality"),
     bhMeta: document.getElementById("bhMeta"),
     bhClose: document.getElementById("bhClose"),
+    shortlistBtn: document.getElementById("shortlistBtn"),
+    drawer: document.getElementById("shortlistDrawer"),
+    slBackdrop: document.getElementById("slBackdrop"),
+    slRows: document.getElementById("slRows"),
+    slClose: document.getElementById("slClose"),
+    agentForm: document.getElementById("agentForm"),
+    agentName: document.getElementById("agentName"),
+    agentLine: document.getElementById("agentLine"),
+    agentPhone: document.getElementById("agentPhone"),
+    agentNote: document.getElementById("agentNote"),
+    shareShortlist: document.getElementById("shareShortlist"),
+    slUrl: document.getElementById("slUrl"),
   };
 
   const map = L.map("map", { zoomControl: true, preferCanvas: true }).setView(BANGKOK, 12);
@@ -1739,12 +2235,351 @@
   }
 
   function filtered() {
+    if (shortlistMode) {
+      const items = resolvedShortlist();
+      if (focusedBuildingId) return items.filter((l) => l.building_id === focusedBuildingId);
+      return items;
+    }
     const q = focusedBuildingId ? "" : textQuery();
     return allListings.filter((l) => {
       if (!matchesStructural(l)) return false;
       if (focusedBuildingId) return l.building_id === focusedBuildingId;
       if (!listingMatchesText(l, q)) return false;
       return inMoveBounds(l.lat, l.lng);
+    });
+  }
+
+  function loadStoredShortlist() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(SHORTLIST_KEY) || "[]");
+      shortlistOrder = Array.isArray(raw) ? raw.filter((id) => typeof id === "string" && id) : [];
+    } catch (err) {
+      shortlistOrder = [];
+    }
+  }
+
+  function saveShortlist() {
+    try { localStorage.setItem(SHORTLIST_KEY, JSON.stringify(shortlistOrder)); } catch (err) { /* private mode */ }
+  }
+
+  function currentAgent() {
+    return {
+      name: el.agentName.value.trim().slice(0, 60),
+      line: el.agentLine.value.trim().slice(0, 40),
+      phone: el.agentPhone.value.trim().slice(0, 24),
+      note: el.agentNote.value.replace(/\s+/g, " ").trim().slice(0, 160),
+    };
+  }
+
+  function saveAgent() {
+    try { localStorage.setItem(AGENT_KEY, JSON.stringify(currentAgent())); } catch (err) { /* private mode */ }
+  }
+
+  function loadStoredAgent() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(AGENT_KEY) || "null");
+      if (!raw || typeof raw !== "object") return;
+      el.agentName.value = String(raw.name || "").slice(0, 60);
+      el.agentLine.value = String(raw.line || "").slice(0, 40);
+      el.agentPhone.value = String(raw.phone || "").slice(0, 24);
+      el.agentNote.value = String(raw.note || "").slice(0, 160);
+    } catch (err) { /* ignore broken storage */ }
+  }
+
+  function normalizeLineId(raw) {
+    let value = String(raw || "").trim();
+    const match = value.match(/line\.me\/(?:R\/)?ti\/p\/([^/?#]+)/i);
+    if (match) {
+      try { value = decodeURIComponent(match[1]); } catch (err) { value = match[1]; }
+    }
+    return value.replace(/\s+/g, "");
+  }
+
+  function lineHref(id) {
+    const clean = normalizeLineId(id);
+    if (!clean) return "";
+    return "https://line.me/R/ti/p/" + encodeURIComponent(clean);
+  }
+
+  function phoneHref(phone) {
+    const dial = String(phone || "").trim().replace(/[^\d+]/g, "");
+    return dial ? "tel:" + dial : "";
+  }
+
+  function wantsNativeShare() {
+    const narrow = window.matchMedia("(max-width: 820px)").matches;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    return (narrow || coarse) && typeof navigator.share === "function";
+  }
+
+  function shareLabel() {
+    return wantsNativeShare() ? "Share" : "Copy link";
+  }
+
+  function listingShareUrl(id) {
+    const url = new URL(location.href);
+    url.hash = "";
+    url.search = "";
+    url.searchParams.set("listing", id);
+    return url.toString();
+  }
+
+  function shortlistShareUrl(ids, agent) {
+    const url = new URL(location.href);
+    url.hash = "";
+    url.search = "";
+    const line = normalizeLineId(agent.line);
+    const params = new URLSearchParams();
+    params.set("sl", ids.map(compactId).join(","));
+    if (agent.name) params.set("ag", agent.name);
+    if (line) params.set("ln", line);
+    if (agent.phone) params.set("ph", agent.phone);
+    if (agent.note) params.set("nt", agent.note);
+    // Keep commas between compact ids so a long shortlist stays readable.
+    url.search = params.toString().replace(/%2C/g, ",");
+    return url.toString();
+  }
+
+  let toastTimer = 0;
+  function showToast(message) {
+    const node = document.getElementById("toast");
+    if (!node) return;
+    node.textContent = message;
+    node.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { node.hidden = true; }, 2200);
+  }
+
+  async function shareLink(url, title, text) {
+    if (wantsNativeShare()) {
+      try {
+        await navigator.share({ title, text, url });
+        return "shared";
+      } catch (err) {
+        if (err && err.name === "AbortError") return "aborted";
+      }
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+        return "copied";
+      }
+    } catch (err) { /* clipboard blocked */ }
+    try {
+      const area = document.createElement("textarea");
+      area.value = url;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.left = "-9999px";
+      document.body.appendChild(area);
+      area.select();
+      const ok = document.execCommand("copy");
+      area.remove();
+      if (ok) return "copied";
+    } catch (err) { /* last resort is the prompt */ }
+    return "failed";
+  }
+
+  function heartSvg() {
+    return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.7-4.4-9.3-8.2C.7 10 1.2 6.4 4.1 5 6.2 4 8.5 4.6 12 7.8 15.5 4.6 17.8 4 19.9 5c2.9 1.4 3.4 5 1.4 7.8C18.7 16.6 12 21 12 21z"/></svg>`;
+  }
+
+  function heartBtnHtml(id, withLabel) {
+    const on = shortlistOrder.includes(id);
+    const cls = withLabel ? "heart-btn detail-heart" : "heart-btn";
+    const text = withLabel ? `<span class="heart-label">${on ? "Shortlisted" : "Shortlist"}</span>` : "";
+    return `<button type="button" class="${cls}${on ? " on" : ""}" data-heart="${esc(id)}" aria-pressed="${on ? "true" : "false"}" aria-label="${on ? "Remove from shortlist" : "Add to shortlist"}">${heartSvg()}${text}</button>`;
+  }
+
+  function bedsShort(l) {
+    if (!l || l.bedrooms == null) return "";
+    if (l.bedrooms === 0) return "Studio";
+    return `${l.bedrooms} bed${Number(l.bedrooms) === 1 ? "" : "s"}`;
+  }
+
+  function paintHearts() {
+    document.querySelectorAll("[data-heart]").forEach((btn) => {
+      const on = shortlistOrder.includes(btn.dataset.heart);
+      btn.classList.toggle("on", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.setAttribute("aria-label", on ? "Remove from shortlist" : "Add to shortlist");
+      const label = btn.querySelector(".heart-label");
+      if (label) label.textContent = on ? "Shortlisted" : "Shortlist";
+    });
+    const count = document.getElementById("shortlistCount");
+    if (count) {
+      count.textContent = String(shortlistOrder.length);
+      count.hidden = shortlistOrder.length === 0;
+    }
+    if (el.shareShortlist) el.shareShortlist.disabled = shortlistOrder.length === 0;
+  }
+
+  function renderShortlistRows() {
+    if (!el.slRows) return;
+    if (!shortlistOrder.length) {
+      el.slRows.innerHTML = `<p class="sl-empty">No homes yet. Use the heart on a listing to add it.</p>`;
+      paintHearts();
+      return;
+    }
+    el.slRows.innerHTML = shortlistOrder.map((id, index) => {
+      const listing = allListings.find((x) => x.id === id);
+      if (!listing) {
+        return `<div class="sl-row" data-sl-id="${esc(id)}">
+          <div class="sl-open" style="cursor:default">
+            <span class="sl-photo">${PLACEHOLDER}</span>
+            <span><span class="sl-title">Listing unavailable</span><span class="sl-meta">Removed from the map</span></span>
+          </div>
+          <div class="sl-ops"><button type="button" data-sl-remove aria-label="Remove">×</button></div>
+        </div>`;
+      }
+      const src = photoSrc(listing, 0);
+      const building = buildingOf(listing);
+      const photo = src
+        ? `<img src="${esc(src)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'placeholder',textContent:'No photo'}))">`
+        : PLACEHOLDER;
+      const bits = [bedsShort(listing), building && building.name].filter(Boolean).join(" · ");
+      const unset = listing.price_thb == null;
+      const high = isHighRent(listing);
+      return `<div class="sl-row" data-sl-id="${esc(id)}">
+        <button type="button" class="sl-open" data-sl-open>
+          <span class="sl-photo">${photo}</span>
+          <span>
+            <span class="sl-title">${esc(listing.title || "Untitled")}</span>
+            <span class="sl-meta">${esc(bits)}</span>
+            <span class="sl-rent${unset ? " unset" : ""}${high ? " high" : ""}">${esc(priceText(listing))}</span>
+          </span>
+        </button>
+        <div class="sl-ops">
+          <button type="button" data-sl-up aria-label="Move up"${index === 0 ? " disabled" : ""}>↑</button>
+          <button type="button" data-sl-down aria-label="Move down"${index === shortlistOrder.length - 1 ? " disabled" : ""}>↓</button>
+          <button type="button" data-sl-remove aria-label="Remove from shortlist">×</button>
+        </div>
+      </div>`;
+    }).join("");
+    paintHearts();
+  }
+
+  function toggleShortlist(id) {
+    if (!id || shortlistMode) return;
+    const index = shortlistOrder.indexOf(id);
+    if (index >= 0) shortlistOrder.splice(index, 1);
+    else shortlistOrder.push(id);
+    saveShortlist();
+    renderShortlistRows();
+  }
+
+  function moveShortlist(id, dir) {
+    const index = shortlistOrder.indexOf(id);
+    const next = index + dir;
+    if (index < 0 || next < 0 || next >= shortlistOrder.length) return;
+    const swap = shortlistOrder[index];
+    shortlistOrder[index] = shortlistOrder[next];
+    shortlistOrder[next] = swap;
+    saveShortlist();
+    renderShortlistRows();
+  }
+
+  function openDrawer() {
+    if (shortlistMode) return;
+    renderShortlistRows();
+    el.slBackdrop.hidden = false;
+    el.drawer.hidden = false;
+    el.shortlistBtn.setAttribute("aria-expanded", "true");
+    el.slClose.focus();
+  }
+
+  function closeDrawer() {
+    if (!el.drawer || el.drawer.hidden) return;
+    el.slBackdrop.hidden = true;
+    el.drawer.hidden = true;
+    el.shortlistBtn.setAttribute("aria-expanded", "false");
+  }
+
+  async function shareCurrentListing() {
+    if (!detailListing) return;
+    const url = listingShareUrl(detailListing.id);
+    const title = detailListing.title || "Roomie listing";
+    const result = await shareLink(url, title, `${title} · ${detailPrice(detailListing)}`);
+    if (result === "copied") {
+      showToast("Link copied");
+      const btn = el.detail.querySelector(".detail-share");
+      if (btn) {
+        const prev = btn.textContent;
+        btn.textContent = "Copied";
+        setTimeout(() => { if (btn.isConnected) btn.textContent = prev; }, 1600);
+      }
+    } else if (result === "failed") {
+      history.replaceState(null, "", url);
+      showToast("Copy the link from the address bar");
+    }
+  }
+
+  async function shareCurrentShortlist() {
+    if (!shortlistOrder.length) return;
+    saveAgent();
+    const agent = currentAgent();
+    const ids = shortlistOrder.filter((id) => allListings.some((l) => l.id === id));
+    if (!ids.length) {
+      showToast("None of these listings are on the map");
+      return;
+    }
+    const url = shortlistShareUrl(ids, agent);
+    el.slUrl.hidden = false;
+    el.slUrl.value = url;
+    const who = agent.name ? `Shortlist from ${agent.name}` : "Shortlist for you";
+    const result = await shareLink(url, who, agent.note || "Homes picked for you on Roomie");
+    if (result === "copied") showToast("Shortlist link copied");
+    else if (result === "shared") showToast("Shortlist ready to send");
+    else if (result === "failed") {
+      el.slUrl.focus();
+      el.slUrl.select();
+      showToast("Copy the link below");
+    }
+  }
+
+  function clientHeroHtml() {
+    if (!shortlistMode) return "";
+    const name = String(sharedAgent.name || "").trim();
+    const line = normalizeLineId(sharedAgent.line);
+    const phone = String(sharedAgent.phone || "").trim();
+    const note = String(sharedAgent.note || "").trim();
+    const href = lineHref(line);
+    const tel = phoneHref(phone);
+    const lineBtn = href
+      ? `<a class="btn-line" href="${esc(href)}" target="_blank" rel="noopener noreferrer">Chat on LINE</a>`
+      : "";
+    const callBtn = tel ? `<a class="btn-call" href="${esc(tel)}">Call ${esc(phone)}</a>` : "";
+    const actions = (lineBtn || callBtn) ? `<div class="client-actions">${lineBtn}${callBtn}</div>` : "";
+    const missing = shortlistMissing
+      ? `<p class="client-missing">${shortlistMissing} listing${shortlistMissing === 1 ? "" : "s"} in this link ${shortlistMissing === 1 ? "is" : "are"} no longer available.</p>`
+      : "";
+    // resolvedShortlist() updates shortlistMissing as a side effect. Callers that
+    // paint the hero must call it first so the missing count is current.
+    return `<section class="client-card" aria-label="Shortlist for you">
+      <h2 class="client-kicker">Shortlist for you</h2>
+      <p class="client-by">${name ? `Prepared by ${esc(name)}` : "A Roomie agent prepared these homes for you."}</p>
+      ${actions}
+      ${note ? `<p class="client-note">${esc(note)}</p>` : ""}
+      ${missing}
+    </section>`;
+  }
+
+  function addListingPin(pins, l) {
+    if (l.building_id && buildingById.has(l.building_id)) {
+      const building = buildingById.get(l.building_id);
+      const pin = pins.get(building.id) || { building, count: 0, high: false };
+      pin.count += 1;
+      if (isHighRent(l)) pin.high = true;
+      pins.set(building.id, pin);
+      return;
+    }
+    if (!Number.isFinite(Number(l.lat)) || !Number.isFinite(Number(l.lng))) return;
+    pins.set("listing:" + l.id, {
+      listing: l,
+      count: 1,
+      high: isHighRent(l),
+      lat: Number(l.lat),
+      lng: Number(l.lng),
     });
   }
 
@@ -1767,14 +2602,17 @@
     if (!focusedBuildingId) return "";
     const b = buildingById.get(focusedBuildingId);
     if (!b) return "";
-    const n = unitsFor(b.id).length;
+    const n = shortlistMode
+      ? resolvedShortlist().filter((l) => l.building_id === b.id).length
+      : unitsFor(b.id).length;
     const kind = b.type === "condo" ? "Condo" : b.type === "apartment" ? "Apartment" : "Building";
     const thai = b.name_th && b.name_th !== b.name ? b.name_th : "";
     const status = n === 0
       ? "No units listed yet"
       : `${n} available unit${n === 1 ? "" : "s"}`;
+    const backLabel = shortlistMode ? "All shortlisted" : "All listings";
     return `<div class="building-banner">
-      <button type="button" class="btn" id="backAll">All listings</button>
+      <button type="button" class="btn" id="backAll">${backLabel}</button>
       <div class="banner-copy">
         <strong>${esc(b.name)}</strong>
         <span>${esc([areaText(b), kind, thai, status].filter(Boolean).join(" · "))}</span>
@@ -1792,25 +2630,34 @@
     } else {
       el.count.innerHTML = `<strong>${items.length}</strong> result${items.length === 1 ? "" : "s"}`;
     }
+    if (shortlistMode && !focused) {
+      el.count.innerHTML = `<strong>${items.length}</strong> home${items.length === 1 ? "" : "s"} for you`;
+    }
+    const hero = clientHeroHtml();
     if (!items.length) {
-      const message = focused
-        ? (unitsFor(focused.id).length
-          ? "No listings in this building match your filters."
-          : `<strong>No units listed yet</strong><br>${esc(focused.name)} is in the directory. A home will show up here when the owner posts it.`)
-        : "No listings match your filters.";
-      el.list.innerHTML = `${bannerHtml()}<div class="empty-state">${message}</div>`;
+      const message = shortlistMode
+        ? (focused
+          ? "No shortlisted homes in this building."
+          : "Nothing on this shortlist is available right now.")
+        : (focused
+          ? (unitsFor(focused.id).length
+            ? "No listings in this building match your filters."
+            : `<strong>No units listed yet</strong><br>${esc(focused.name)} is in the directory. A home will show up here when the owner posts it.`)
+          : "No listings match your filters.");
+      el.list.innerHTML = `${hero}${bannerHtml()}<div class="empty-state">${message}</div>`;
       return;
     }
-    el.list.innerHTML = bannerHtml() + items.map((l) => {
+    el.list.innerHTML = hero + bannerHtml() + items.map((l) => {
       const src = photoSrc(l, 0);
       const b = buildingOf(l);
       const place = [b && b.name, l.neighborhood, l.district].filter(Boolean).join(" · ");
-      const notes = shortNotes(l);
+      const notes = shortlistMode ? "" : shortNotes(l);
       const unset = l.price_thb == null;
       const high = isHighRent(l);
       const nPhotos = photoCount(l);
-      return `<article class="card${l.id === selectedId ? " selected" : ""}${high ? " high" : ""}" data-id="${esc(l.id)}" tabindex="0" role="button">
-        <div class="card-photo">${src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'placeholder',textContent:'No photo'}))">` : PLACEHOLDER}${nPhotos > 1 ? `<span class="photo-count">${nPhotos} photos</span>` : ""}</div>
+      const heart = shortlistMode ? "" : heartBtnHtml(l.id, false);
+      return `<article class="card${l.id === selectedId ? " selected" : ""}${high ? " high" : ""}" data-id="${esc(l.id)}" tabindex="0">
+        <div class="card-photo">${src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'placeholder',textContent:'No photo'}))">` : PLACEHOLDER}${heart}${nPhotos > 1 ? `<span class="photo-count">${nPhotos} photos</span>` : ""}</div>
         <div class="card-body">
           <h2 class="card-title">${esc(l.title || "Untitled")}</h2>
           <div class="card-loc">${esc(place || l.city || "Bangkok")}</div>
@@ -1853,30 +2700,28 @@
   }
 
   function pinsToShow() {
-    const q = focusedBuildingId ? "" : textQuery();
     const pins = new Map();
+    if (shortlistMode) {
+      resolvedShortlist().forEach((l) => addListingPin(pins, l));
+      return pins;
+    }
+    const q = focusedBuildingId ? "" : textQuery();
     allListings.forEach((l) => {
       if (!matchesStructural(l) || !listingMatchesText(l, q)) return;
       if (l.building_id && buildingById.has(l.building_id)) {
         const b = buildingById.get(l.building_id);
         if (!inMoveBounds(b.lat, b.lng)) return;
-        const pin = pins.get(b.id) || { building: b, count: 0, high: false };
-        pin.count += 1;
-        if (isHighRent(l)) pin.high = true;
-        pins.set(b.id, pin);
-        return;
-      }
-      // Listings that are not tied to a directory building still get their own pin.
-      if (!inMoveBounds(l.lat, l.lng)) return;
-      if (!Number.isFinite(Number(l.lat)) || !Number.isFinite(Number(l.lng))) return;
-      pins.set("listing:" + l.id, {
-        listing: l,
-        count: 1,
-        high: isHighRent(l),
-        lat: Number(l.lat),
-        lng: Number(l.lng),
-      });
+      } else if (!inMoveBounds(l.lat, l.lng)) return;
+      addListingPin(pins, l);
     });
+    if (selectedId) {
+      const selected = allListings.find((l) => l.id === selectedId);
+      const already = selected && (
+        (selected.building_id && pins.has(selected.building_id))
+        || pins.has("listing:" + selected.id)
+      );
+      if (selected && !already) addListingPin(pins, selected);
+    }
     const showEmpty = map.getZoom() >= EMPTY_ZOOM && !q;
     const emptyCandidates = showEmpty
       ? allBuildings.filter((b) => !pins.has(b.id) && inView(b.lat, b.lng))
@@ -2219,8 +3064,10 @@
     if (l.available_from) rows.push(factRow("Available from", formatWhen(l.available_from)));
     if (l.listed_at) rows.push(factRow("Listed", formatWhen(l.listed_at)));
     if (l.scraped_at) rows.push(factRow("Recorded", formatWhen(l.scraped_at)));
-    if (l.contact) rows.push(factRow("Contact", l.contact));
-    else rows.push(factRow("Contact", "Contact not listed", { muted: true }));
+    if (!shortlistMode) {
+      if (l.contact) rows.push(factRow("Contact", l.contact));
+      else rows.push(factRow("Contact", "Contact not listed", { muted: true }));
+    }
     const sourceUrl = httpUrl(l.source_url);
     if (l.source || sourceUrl) {
       const name = l.source || "Listing source";
@@ -2294,9 +3141,13 @@
       ? `<div class="thumbs">${photos.map((src, i) => `<button type="button" class="thumb" data-index="${i}" aria-label="Photo ${i + 1} of ${photos.length}" aria-current="${i === 0 ? "true" : "false"}"><img src="${esc(src)}" alt="" draggable="false"></button>`).join("")}</div><p class="gallery-hint">Swipe or use the arrows. Click a photo to enlarge.</p>`
       : "";
     const notes = (l.raw_notes || "").trim();
+    const shareActions = shortlistMode ? "" : `${heartBtnHtml(l.id, true)}<button type="button" class="btn btn-brand detail-share">${esc(shareLabel())}</button>`;
     el.detail.innerHTML = `<div class="detail-bar">
         <button type="button" class="btn detail-back">‹ ${esc(backLabel)}</button>
-        <button type="button" class="btn detail-map">Show on map</button>
+        <div class="detail-actions">
+          ${shareActions}
+          <button type="button" class="btn detail-map">Show on map</button>
+        </div>
       </div>
       <div class="detail-inner">
         <article class="detail-card">
@@ -2322,7 +3173,7 @@
     if (track) track.addEventListener("scroll", onGalleryScroll, { passive: true });
   }
 
-  function openDetail(l) {
+  function openDetail(l, opts = {}) {
     if (!l) return;
     const same = detailListing && detailListing.id === l.id && !el.detail.hidden;
     detailListing = l;
@@ -2333,10 +3184,11 @@
     }
     el.detail.hidden = false;
     if (window.matchMedia("(max-width: 820px)").matches) setMobileView("list");
-    if (!same) {
+    if (!same && !opts.skipFocus) {
       const back = el.detail.querySelector(".detail-back");
       if (back) back.focus();
     }
+    if (urlReady && !shortlistMode) writeFiltersToUrl();
   }
 
   function detailIsVisible() {
@@ -2356,6 +3208,7 @@
       const card = el.list.querySelector(`.card[data-id="${CSS.escape(selectedId)}"]`);
       if (card) card.focus();
     }
+    if (urlReady && wasOpen && !shortlistMode) writeFiltersToUrl();
   }
 
   function renderLightbox() {
@@ -2443,21 +3296,24 @@
     if (!opts.skipPan && Number.isFinite(Number(l.lat)) && Number.isFinite(Number(l.lng))) {
       suppressMoveFilter = true;
       const z = Math.max(map.getZoom(), 16);
-      map.setView([Number(l.lat), Number(l.lng)], z, { animate: true });
+      map.setView([Number(l.lat), Number(l.lng)], z, { animate: !opts.fromUrl });
       setTimeout(() => { suppressMoveFilter = false; }, 400);
     }
     openOverlay(l);
-    openDetail(l);
+    openDetail(l, { skipFocus: !!opts.fromUrl });
+    if (opts.fromUrl) syncMarkers();
   }
 
   function focusBuilding(id, opts = {}) {
     const b = buildingById.get(id);
     if (!b) return;
     focusedBuildingId = id;
-    suppressSearch = true;
-    el.q.value = b.name || "";
-    suppressSearch = false;
-    hideSuggest();
+    if (!shortlistMode) {
+      suppressSearch = true;
+      el.q.value = b.name || "";
+      suppressSearch = false;
+      hideSuggest();
+    }
     selectedId = null;
     closeOverlay();
     closeDetail();
@@ -2473,9 +3329,11 @@
   function showAll() {
     focusedBuildingId = null;
     selectedId = null;
-    suppressSearch = true;
-    el.q.value = "";
-    suppressSearch = false;
+    if (!shortlistMode) {
+      suppressSearch = true;
+      el.q.value = "";
+      suppressSearch = false;
+    }
     hideSuggest();
     closeOverlay();
     closeDetail();
@@ -2487,25 +3345,25 @@
     renderList(items);
     syncMarkers();
     if (selectedId && !items.some((x) => x.id === selectedId)) {
-      selectedId = null;
-      closeOverlay();
-      closeDetail();
-      paintMarkerSelection();
+      const keepOpen = detailListing && detailListing.id === selectedId;
+      if (!keepOpen) {
+        selectedId = null;
+        closeOverlay();
+        closeDetail();
+        paintMarkerSelection();
+      }
     }
     if (fit) {
       suppressMoveFilter = true;
-      if (areaBbox) {
+      if (shortlistMode) {
+        fitListingPoints(items);
+      } else if (areaBbox) {
         map.fitBounds(
           [[areaBbox.south, areaBbox.west], [areaBbox.north, areaBbox.east]],
           { padding: [20, 20] }
         );
       } else {
-        const pts = items
-          .filter((l) => Number.isFinite(Number(l.lat)) && Number.isFinite(Number(l.lng)))
-          .map((l) => [Number(l.lat), Number(l.lng)]);
-        if (pts.length === 1) map.setView(pts[0], 16);
-        else if (pts.length > 1) map.fitBounds(pts, { padding: [40, 40] });
-        else map.setView(BANGKOK, 12);
+        fitListingPoints(items);
       }
       setTimeout(() => { suppressMoveFilter = false; syncMarkers(); }, 400);
     }
@@ -2552,7 +3410,25 @@
     if (el.pets.checked || el.furnish.value) setMoreOpen(true);
   }
 
+  function fitListingPoints(list) {
+    const pts = [];
+    const seen = new Set();
+    list.forEach((l) => {
+      const lat = Number(l.lat);
+      const lng = Number(l.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+      const key = lat.toFixed(5) + "," + lng.toFixed(5);
+      if (seen.has(key)) return;
+      seen.add(key);
+      pts.push([lat, lng]);
+    });
+    if (pts.length === 1) map.setView(pts[0], 16, { animate: false });
+    else if (pts.length > 1) map.fitBounds(pts, { padding: [48, 48], maxZoom: 15, animate: false });
+    else map.setView(BANGKOK, 12, { animate: false });
+  }
+
   function writeFiltersToUrl() {
+    if (shortlistMode) return;
     const p = new URLSearchParams();
     const q = el.q.value.trim();
     if (q) p.set("q", q);
@@ -2563,9 +3439,11 @@
     if (el.pets.checked) p.set("pets", "1");
     if (el.furnish.value) p.set("furnish", el.furnish.value);
     if (!el.trains.checked) p.set("trains", "0");
+    if (detailListing) p.set("listing", detailListing.id);
     const qs = p.toString();
     const next = qs ? `${location.pathname}?${qs}` : location.pathname;
-    if (location.pathname + location.search !== next) history.replaceState(null, "", next);
+    const current = location.pathname + location.search + location.hash;
+    if (current !== next) history.replaceState(null, "", next);
   }
 
   function setMobileView(view) {
@@ -2580,10 +3458,18 @@
       showAll();
       return;
     }
+    const heart = e.target.closest(".heart-btn");
+    if (heart) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleShortlist(heart.dataset.heart);
+      return;
+    }
     const card = e.target.closest(".card");
     if (card) selectListing(card.dataset.id, { fromList: true });
   });
   el.list.addEventListener("keydown", (e) => {
+    if (e.target.closest("button")) return;
     if (e.key === "Enter" || e.key === " ") {
       const card = e.target.closest(".card");
       if (card) { e.preventDefault(); selectListing(card.dataset.id, { fromList: true }); }
@@ -2628,6 +3514,15 @@
     }
     if (e.target.closest(".detail-map")) {
       setMobileView("map");
+      return;
+    }
+    const heart = e.target.closest(".detail-heart");
+    if (heart) {
+      toggleShortlist(heart.dataset.heart || (detailListing && detailListing.id));
+      return;
+    }
+    if (e.target.closest(".detail-share")) {
+      shareCurrentListing();
       return;
     }
     const nav = e.target.closest(".gal-nav");
@@ -2696,6 +3591,11 @@
       if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeLightbox(); }
       else if (e.key === "ArrowLeft") { e.preventDefault(); stepLightbox(-1); }
       else if (e.key === "ArrowRight") { e.preventDefault(); stepLightbox(1); }
+      return;
+    }
+    if (el.drawer && !el.drawer.hidden && e.key === "Escape") {
+      e.preventDefault();
+      closeDrawer();
       return;
     }
     const typing = e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
@@ -2840,13 +3740,69 @@
   el.btnList.addEventListener("click", () => setMobileView("list"));
   el.btnMap.addEventListener("click", () => setMobileView("map"));
 
+  el.shortlistBtn.addEventListener("click", () => {
+    if (el.drawer.hidden) openDrawer();
+    else closeDrawer();
+  });
+  el.slClose.addEventListener("click", closeDrawer);
+  el.slBackdrop.addEventListener("click", closeDrawer);
+  el.drawer.addEventListener("click", (e) => {
+    const row = e.target.closest("[data-sl-id]");
+    if (!row) return;
+    const id = row.dataset.slId;
+    if (e.target.closest("[data-sl-up]")) {
+      moveShortlist(id, -1);
+      return;
+    }
+    if (e.target.closest("[data-sl-down]")) {
+      moveShortlist(id, 1);
+      return;
+    }
+    if (e.target.closest("[data-sl-remove]")) {
+      shortlistOrder = shortlistOrder.filter((x) => x !== id);
+      saveShortlist();
+      renderShortlistRows();
+      return;
+    }
+    if (e.target.closest("[data-sl-open]")) {
+      closeDrawer();
+      selectListing(id, { fromList: true });
+    }
+  });
+  el.agentForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    shareCurrentShortlist();
+  });
+  [el.agentName, el.agentLine, el.agentPhone, el.agentNote].forEach((node) => {
+    node.addEventListener("input", () => {
+      saveAgent();
+      el.slUrl.hidden = true;
+    });
+  });
+
   function fitAreaSoon() {
-    refresh({ fit: true });
+    const token = pendingListingToken;
+    pendingListingToken = "";
+    const listing = token ? resolveToken(token) : null;
+    if (listing && !shortlistMode) {
+      refresh();
+      selectListing(listing.id, { fromUrl: true });
+    } else if (shortlistMode) {
+      refresh({ fit: true });
+      if (listing && resolvedShortlist().some((l) => l.id === listing.id)) {
+        selectListing(listing.id, { fromUrl: true });
+      }
+    } else {
+      refresh({ fit: true });
+    }
     setTimeout(() => map.invalidateSize(), 100);
   }
 
   const boot = (listings, directory) => {
-    applyUrlFilters();
+    if (!shortlistMode) applyUrlFilters();
+    loadStoredShortlist();
+    loadStoredAgent();
+    document.body.classList.toggle("mode-shortlist", shortlistMode);
     allListings = Array.isArray(listings) ? listings : [];
     const buildings = directory && Array.isArray(directory.buildings) ? directory.buildings : [];
     allBuildings = buildings;
@@ -2865,8 +3821,9 @@
     AREA_LABEL.ekamai = "Ekamai";
     renderHeader(areas);
     areaBbox = directory && directory.area ? directory.area.bbox : null;
-    fitAreaSoon();
     urlReady = true;
+    fitAreaSoon();
+    paintHearts();
   };
 
   const loadJson = (url) => fetch(url).then((r) => {
