@@ -251,6 +251,61 @@
       line-height: 1.4;
       color: var(--muted);
     }
+    .sort-select { min-width: 168px; }
+    .active-count {
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #f0fdf4;
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .active-count[hidden] { display: none !important; }
+    .sheet-backdrop { display: none; }
+    .sheet-head { display: none; }
+    .line-picks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      flex: 1 0 100%;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      min-width: 0;
+    }
+    .line-picks legend {
+      padding: 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-right: 2px;
+    }
+    .line-chip { gap: 6px; }
+    .line-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.18);
+    }
+    .station-dist {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      max-width: 100%;
+    }
+    .station-dist span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .result-count {
       font-size: 13px;
       color: var(--muted);
@@ -374,6 +429,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    .card-station {
+      font-size: 12px;
+      color: #374151;
+      min-width: 0;
+    }
     .card-price {
       font-size: 16px;
       font-weight: 700;
@@ -491,10 +551,12 @@
       text-overflow: ellipsis;
     }
     .map-overlay .ov-loc,
-    .map-overlay .ov-meta {
+    .map-overlay .ov-meta,
+    .map-overlay .ov-station {
       font-size: 11px;
       color: var(--muted);
     }
+    .map-overlay .ov-station { margin-top: 2px; color: #374151; }
     .ov-details {
       margin-top: 6px;
       padding: 0;
@@ -701,6 +763,13 @@
       font-size: 14px;
       color: #374151;
     }
+    .detail-station {
+      margin-top: 6px;
+      font-size: 14px;
+      color: #374151;
+    }
+    .detail-station .station-dist span,
+    .fact .station-dist span { white-space: normal; }
     .facts { margin: 14px 0 0; }
     .fact {
       display: grid;
@@ -1484,6 +1553,57 @@
       .search-wrap { flex: 1 1 100%; }
       .suggest { min-width: 0; }
       .result-count { margin-left: 0; width: 100%; }
+      .sort-select { flex: 1 1 auto; min-width: 0; }
+      body.sheet-open .topbar { z-index: 40; }
+      .mobile-toggle { position: relative; z-index: 45; }
+      .sheet-backdrop:not([hidden]) {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 64;
+        background: rgba(17, 24, 39, .38);
+      }
+      .more-filters {
+        position: fixed;
+        z-index: 65;
+        left: 0;
+        right: 0;
+        bottom: 58px;
+        flex: none;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 10px;
+        max-height: calc(100vh - 70px);
+        overflow: auto;
+        margin: 0;
+        padding: 12px 14px 16px;
+        background: #fff;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -8px 32px rgba(0,0,0,.18);
+        -webkit-overflow-scrolling: touch;
+      }
+      .more-filters.open { display: flex; }
+      .sheet-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: sticky;
+        top: -12px;
+        z-index: 1;
+        margin: -12px -14px 0;
+        padding: 12px 14px 10px;
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+      }
+      .sheet-head strong { font-size: 16px; }
+      .sheet-done { margin-left: auto; }
+      .more-filters select,
+      .more-filters .price-group { width: 100%; }
+      .more-filters .price-group input[type="number"] { flex: 1 1 0; width: auto; min-width: 0; }
+      .more-filters .line-picks,
+      .more-filters .filter-note { flex: none; width: 100%; }
+      .line-picks { flex-direction: row; align-items: center; }
       .map-overlay { max-width: none; }
       .detail-pane { width: 100%; border-right: none; }
       body.view-map .detail-pane { display: none !important; }
@@ -1559,14 +1679,50 @@
         <option value="apartment">Apartment</option>
         <option value="house">House</option>
       </select>
+      <select id="sort" class="sort-select" aria-label="Sort listings">
+        <option value="new">Newest</option>
+        <option value="price-asc">Price: low to high</option>
+        <option value="price-desc">Price: high to low</option>
+        <option value="size">Size (largest)</option>
+        <option value="station">Nearest to station</option>
+      </select>
       <label class="chip-check" title="Show Bangkok train and metro lines">
         <input type="checkbox" id="trains" checked>
         Train lines
       </label>
       <button type="button" class="btn btn-more" id="moreBtn" aria-expanded="false" aria-controls="moreFilters">More filters</button>
-      <button type="button" class="btn btn-reset" id="resetBtn">Reset</button>
+      <button type="button" class="btn btn-reset" id="resetBtn">Clear all</button>
+      <span class="active-count" id="activeCount" hidden>0 filters</span>
       <div class="result-count" id="resultCount" role="status">—</div>
-      <div class="more-filters" id="moreFilters">
+      <div class="more-filters" id="moreFilters" aria-label="More filters">
+        <div class="sheet-head">
+          <strong>More filters</strong>
+          <button type="button" class="btn sheet-done" id="sheetDone">Done</button>
+        </div>
+        <select id="near" aria-label="Distance to nearest station">
+          <option value="">Any distance to station</option>
+          <option value="500">Within 500 m</option>
+          <option value="1000">Within 1 km</option>
+          <option value="2000">Within 2 km</option>
+        </select>
+        <fieldset class="line-picks" id="linePicks">
+          <legend>On line</legend>
+        </fieldset>
+        <div class="price-group" title="Size range in square meters">
+          <input type="number" id="sizeMin" placeholder="Min" min="0" step="1" inputmode="numeric" aria-label="Minimum size sqm">
+          <span>–</span>
+          <input type="number" id="sizeMax" placeholder="Max" min="0" step="1" inputmode="numeric" aria-label="Maximum size sqm">
+          <span>sqm</span>
+        </div>
+        <select id="baths" aria-label="Bathrooms">
+          <option value="">Any baths</option>
+          <option value="1">1 bath</option>
+          <option value="2">2 baths</option>
+          <option value="3">3+ baths</option>
+        </select>
+        <select id="zone" aria-label="Zone">
+          <option value="">Any zone</option>
+        </select>
         <label class="chip-check">
           <input type="checkbox" id="pets">
           Pet friendly
@@ -1577,9 +1733,10 @@
           <option value="partly">Partly furnished</option>
           <option value="unfurnished">Unfurnished</option>
         </select>
-        <p class="filter-note">Pet friendly and furnishing match only when the listing text states that fact. Listings with no statement stay in the results until that filter is set.</p>
+        <p class="filter-note">Distance is a straight-line walk estimate from the building to the nearest rail station. Choose a line on its own to keep homes whose closest station is on that line, or combine it with a distance to measure the walk on that line. Pet friendly and furnishing match only when the listing text states that fact. Listings with no statement stay in the results until that filter is set.</p>
       </div>
     </div>
+    <div id="sheetBackdrop" class="sheet-backdrop" hidden></div>
   </header>
 
   <div class="main">
@@ -1615,6 +1772,7 @@
           <div class="ov-price" id="ovPrice"></div>
           <div class="ov-title" id="ovTitle"></div>
           <div class="ov-loc" id="ovLoc"></div>
+          <div class="ov-station" id="ovStation"></div>
           <div class="ov-meta" id="ovMeta"></div>
           <button type="button" class="ov-details" id="ovDetails">View details</button>
         </div>
@@ -1673,6 +1831,19 @@
   const EMPTY_ZOOM = 16;
   // A listing at or above this monthly rent uses the purple pin and price accent.
   const HIGH_RENT_THB = 100000;
+  // Fallback swatches match data/transit_lines.geojson. Live colors replace these once the file loads.
+  const LINE_COLOR = {
+    "bts-sukhumvit": "#65B724",
+    "bts-silom": "#02817D",
+    "bts-gold": "#A58704",
+    "mrt-blue": "#1E398D",
+    "mrt-purple": "#893B90",
+    "mrt-yellow": "#FFD400",
+    "mrt-pink": "#E76589",
+    arl: "#59191F",
+    "srt-dark-red": "#B5191E",
+    "srt-light-red": "#FC5353",
+  };
   const SHORTLIST_KEY = "roomie.shortlist.v1";
   const AGENT_KEY = "roomie.agent.v1";
 
@@ -1931,11 +2102,21 @@
     priceMax: document.getElementById("priceMax"),
     beds: document.getElementById("beds"),
     ptype: document.getElementById("ptype"),
+    sort: document.getElementById("sort"),
     moreBtn: document.getElementById("moreBtn"),
     more: document.getElementById("moreFilters"),
+    near: document.getElementById("near"),
+    linePicks: document.getElementById("linePicks"),
+    sizeMin: document.getElementById("sizeMin"),
+    sizeMax: document.getElementById("sizeMax"),
+    baths: document.getElementById("baths"),
+    zone: document.getElementById("zone"),
     pets: document.getElementById("pets"),
     furnish: document.getElementById("furnish"),
     reset: document.getElementById("resetBtn"),
+    activeCount: document.getElementById("activeCount"),
+    sheetBackdrop: document.getElementById("sheetBackdrop"),
+    sheetDone: document.getElementById("sheetDone"),
     count: document.getElementById("resultCount"),
     searchAsMove: document.getElementById("searchAsMove"),
     trains: document.getElementById("trains"),
@@ -1945,6 +2126,7 @@
     ovPrice: document.getElementById("ovPrice"),
     ovTitle: document.getElementById("ovTitle"),
     ovLoc: document.getElementById("ovLoc"),
+    ovStation: document.getElementById("ovStation"),
     ovMeta: document.getElementById("ovMeta"),
     ovClose: document.getElementById("ovClose"),
     ovDetails: document.getElementById("ovDetails"),
@@ -1992,6 +2174,7 @@
   const transitLabelLayer = L.layerGroup();
   const STATION_LABEL_ZOOM = 14;
   let transitStations = [];
+  let stationIndex = [];
   let transitReady = false;
   const lineColorById = {};
 
@@ -2145,6 +2328,157 @@
     if (markerLayer.bringToFront) markerLayer.bringToFront();
   }
 
+  function safeColor(color) {
+    return /^#[0-9a-fA-F]{3,8}$/.test(color || "") ? color : "#6b7280";
+  }
+
+  function haversineMeters(lat1, lng1, lat2, lng2) {
+    const toRad = (deg) => deg * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat / 2) ** 2
+      + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return 2 * 6371000 * Math.asin(Math.min(1, Math.sqrt(a)));
+  }
+
+  function walkMeters(meters) {
+    if (!Number.isFinite(meters)) return Infinity;
+    return meters < 100 ? Math.max(1, Math.round(meters)) : Math.round(meters / 10) * 10;
+  }
+
+  function formatWalk(meters) {
+    const rounded = walkMeters(meters);
+    if (!Number.isFinite(rounded)) return "";
+    if (rounded >= 1000) {
+      const km = Math.round(rounded / 100) / 10;
+      return `${String(km).replace(/\.0$/, "")} km`;
+    }
+    return `${rounded} m`;
+  }
+
+  function stationPhrase(hit) {
+    if (!hit) return "";
+    const code = hit.code ? ` · ${hit.code}` : "";
+    return `${formatWalk(hit.meters)} to ${hit.name}${code}`;
+  }
+
+  function stationHtml(listing) {
+    const hit = listing && listing._near && listing._near.any;
+    if (!hit) return "";
+    const color = safeColor(lineColorById[hit.lineId] || hit.color);
+    return `<span class="station-dist"><i class="line-dot" style="background:${esc(color)}" aria-hidden="true"></i><span>${esc(stationPhrase(hit))}</span></span>`;
+  }
+
+  function renderLinePicks(lines) {
+    if (!el.linePicks) return;
+    const checked = new Set(selectedLineIds());
+    el.linePicks.innerHTML = `<legend>On line</legend>` + lines.map((line) => {
+      const on = checked.has(line.id) ? " checked" : "";
+      return `<label class="chip-check line-chip"><input type="checkbox" value="${esc(line.id)}"${on}><i class="line-dot" style="background:${esc(safeColor(line.color))}" aria-hidden="true"></i>${esc(line.name)}</label>`;
+    }).join("");
+  }
+
+  function indexStations(stationsDoc, linesGeo) {
+    const features = linesGeo && Array.isArray(linesGeo.features) ? linesGeo.features : [];
+    features.forEach((feature) => {
+      const props = feature.properties || {};
+      if (props.id && props.color) lineColorById[props.id] = props.color;
+    });
+    const stations = stationsDoc && Array.isArray(stationsDoc.stations) ? stationsDoc.stations : [];
+    transitStations = stations;
+    stationIndex = [];
+    const lineMeta = new Map();
+    stations.forEach((s) => {
+      const lat = Number(s.lat);
+      const lng = Number(s.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+      const lineIds = [];
+      const codeByLine = {};
+      const colorByLine = {};
+      (s.lines || []).forEach((line) => {
+        if (!line || !line.id || lineIds.includes(line.id)) return;
+        lineIds.push(line.id);
+        codeByLine[line.id] = line.code || "";
+        colorByLine[line.id] = safeColor(lineColorById[line.id] || LINE_COLOR[line.id]);
+        if (!lineMeta.has(line.id)) {
+          lineMeta.set(line.id, {
+            id: line.id,
+            name: line.name_en || line.short || line.id,
+            color: colorByLine[line.id],
+          });
+        }
+      });
+      const primary = lineIds[0] || "";
+      stationIndex.push({
+        lat,
+        lng,
+        name: s.name_en || (s.lines && s.lines[0] && s.lines[0].station_name_en) || "Station",
+        code: primary ? (codeByLine[primary] || "") : "",
+        lineId: primary,
+        lineIds,
+        color: primary ? colorByLine[primary] : "#6b7280",
+        codeByLine,
+        colorByLine,
+      });
+    });
+    const order = features.map((feature) => feature.properties && feature.properties.id).filter(Boolean);
+    const lines = [...lineMeta.values()].sort((a, b) => {
+      const ia = order.indexOf(a.id);
+      const ib = order.indexOf(b.id);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.name.localeCompare(b.name);
+    });
+    renderLinePicks(lines);
+  }
+
+  function nearestForPoint(point) {
+    if (!point || !stationIndex.length) return null;
+    const [lat, lng] = point;
+    let any = null;
+    const byLine = {};
+    stationIndex.forEach((s) => {
+      const meters = haversineMeters(lat, lng, s.lat, s.lng);
+      if (!any || meters < any.meters) {
+        any = {
+          meters,
+          name: s.name,
+          code: s.code,
+          lineId: s.lineId,
+          lineIds: s.lineIds,
+          color: s.color,
+        };
+      }
+      s.lineIds.forEach((id) => {
+        const hit = {
+          meters,
+          name: s.name,
+          code: s.codeByLine[id] || "",
+          lineId: id,
+          color: s.colorByLine[id] || s.color,
+        };
+        if (!byLine[id] || meters < byLine[id].meters) byLine[id] = hit;
+      });
+    });
+    return any ? { any, byLine } : null;
+  }
+
+  function listingPoint(listing) {
+    const building = buildingOf(listing);
+    const lat = Number(building && building.lat != null ? building.lat : listing && listing.lat);
+    const lng = Number(building && building.lng != null ? building.lng : listing && listing.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return [lat, lng];
+  }
+
+  function assignNearestStations() {
+    const cache = new Map();
+    allListings.forEach((listing) => {
+      const building = buildingOf(listing);
+      const key = building ? building.id : `${listing.lat},${listing.lng}`;
+      if (!cache.has(key)) cache.set(key, nearestForPoint(listingPoint(listing)));
+      listing._near = cache.get(key);
+    });
+  }
+
   function buildingOf(listing) {
     return listing && listing.building_id ? buildingById.get(listing.building_id) : null;
   }
@@ -2171,6 +2505,65 @@
     return l.furnishing === want;
   }
 
+  function selectedLineIds() {
+    if (!el.linePicks) return [];
+    return [...el.linePicks.querySelectorAll("input:checked")].map((input) => input.value).filter(Boolean);
+  }
+
+  function bestOnLines(near, lineIds) {
+    let best = null;
+    lineIds.forEach((id) => {
+      const hit = near && near.byLine && near.byLine[id];
+      if (!hit) return;
+      if (!best || hit.meters < best.meters) best = hit;
+    });
+    return best;
+  }
+
+  function matchesStation(l) {
+    const lineIds = selectedLineIds();
+    const cap = el.near.value ? Number(el.near.value) : null;
+    if (!lineIds.length && cap == null) return true;
+    const near = l._near;
+    if (!near || !near.any) return false;
+    if (lineIds.length && cap == null) {
+      const served = near.any.lineIds || (near.any.lineId ? [near.any.lineId] : []);
+      return served.some((id) => lineIds.includes(id));
+    }
+    if (lineIds.length) {
+      const hit = bestOnLines(near, lineIds);
+      return !!hit && walkMeters(hit.meters) <= cap;
+    }
+    return walkMeters(near.any.meters) <= cap;
+  }
+
+  function matchesSize(l) {
+    const min = el.sizeMin.value !== "" ? Number(el.sizeMin.value) : null;
+    const max = el.sizeMax.value !== "" ? Number(el.sizeMax.value) : null;
+    if (min == null && max == null) return true;
+    if (l.size_sqm == null || !Number.isFinite(Number(l.size_sqm))) return false;
+    const n = Number(l.size_sqm);
+    if (min != null && n < min) return false;
+    if (max != null && n > max) return false;
+    return true;
+  }
+
+  function matchesBaths(l) {
+    const baths = el.baths.value;
+    if (!baths) return true;
+    if (l.bathrooms == null || !Number.isFinite(Number(l.bathrooms))) return false;
+    const n = Number(l.bathrooms);
+    if (baths === "3") return n >= 3;
+    return n === Number(baths);
+  }
+
+  function matchesZone(l) {
+    const zone = el.zone.value;
+    if (!zone) return true;
+    const building = buildingOf(l);
+    return !!(building && Array.isArray(building.areas) && building.areas.includes(zone));
+  }
+
   function matchesStructural(l) {
     const min = el.priceMin.value !== "" ? Number(el.priceMin.value) : null;
     const max = el.priceMax.value !== "" ? Number(el.priceMax.value) : null;
@@ -2183,7 +2576,52 @@
     const pt = el.ptype.value;
     if (pt && normType(l.property_type) !== pt) return false;
     if (!matchesPet(l) || !matchesFurnish(l)) return false;
+    if (!matchesSize(l) || !matchesBaths(l) || !matchesZone(l) || !matchesStation(l)) return false;
     return l.status !== "gone";
+  }
+
+  function listingTime(l) {
+    const raw = (l && (l.listed_at || l.scraped_at)) || "";
+    const t = Date.parse(raw);
+    return Number.isFinite(t) ? t : -Infinity;
+  }
+
+  function sortedListings(items) {
+    const mode = (el.sort && el.sort.value) || "new";
+    const copy = items.slice();
+    const byTime = (a, b) => {
+      const diff = listingTime(b) - listingTime(a);
+      if (diff) return diff;
+      return (a._i || 0) - (b._i || 0);
+    };
+    copy.sort((a, b) => {
+      if (mode === "price-asc" || mode === "price-desc") {
+        const ap = a.price_thb == null ? null : Number(a.price_thb);
+        const bp = b.price_thb == null ? null : Number(b.price_thb);
+        const aMissing = ap == null || !Number.isFinite(ap);
+        const bMissing = bp == null || !Number.isFinite(bp);
+        if (aMissing !== bMissing) return aMissing ? 1 : -1;
+        if (!aMissing && ap !== bp) return mode === "price-asc" ? ap - bp : bp - ap;
+        return byTime(a, b);
+      }
+      if (mode === "size") {
+        const as = a.size_sqm == null ? null : Number(a.size_sqm);
+        const bs = b.size_sqm == null ? null : Number(b.size_sqm);
+        const aMissing = as == null || !Number.isFinite(as);
+        const bMissing = bs == null || !Number.isFinite(bs);
+        if (aMissing !== bMissing) return aMissing ? 1 : -1;
+        if (!aMissing && as !== bs) return bs - as;
+        return byTime(a, b);
+      }
+      if (mode === "station") {
+        const am = a._near && a._near.any ? a._near.any.meters : Infinity;
+        const bm = b._near && b._near.any ? b._near.any.meters : Infinity;
+        if (am !== bm) return am - bm;
+        return byTime(a, b);
+      }
+      return byTime(a, b);
+    });
+    return copy;
   }
 
   function textQuery() {
@@ -2241,12 +2679,12 @@
       return items;
     }
     const q = focusedBuildingId ? "" : textQuery();
-    return allListings.filter((l) => {
+    return sortedListings(allListings.filter((l) => {
       if (!matchesStructural(l)) return false;
       if (focusedBuildingId) return l.building_id === focusedBuildingId;
       if (!listingMatchesText(l, q)) return false;
       return inMoveBounds(l.lat, l.lng);
-    });
+    }));
   }
 
   function loadStoredShortlist() {
@@ -2656,11 +3094,13 @@
       const high = isHighRent(l);
       const nPhotos = photoCount(l);
       const heart = shortlistMode ? "" : heartBtnHtml(l.id, false);
+      const station = stationHtml(l);
       return `<article class="card${l.id === selectedId ? " selected" : ""}${high ? " high" : ""}" data-id="${esc(l.id)}" tabindex="0">
         <div class="card-photo">${src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'placeholder',textContent:'No photo'}))">` : PLACEHOLDER}${heart}${nPhotos > 1 ? `<span class="photo-count">${nPhotos} photos</span>` : ""}</div>
         <div class="card-body">
           <h2 class="card-title">${esc(l.title || "Untitled")}</h2>
           <div class="card-loc">${esc(place || l.city || "Bangkok")}</div>
+          ${station ? `<div class="card-station">${station}</div>` : ""}
           <div class="card-price${unset ? " unset" : ""}${high ? " high" : ""}">${esc(priceText(l))}</div>
           <div class="card-meta">${esc(metaParts(l).join(" · "))}</div>
           ${notes ? `<div class="card-notes">${esc(notes)}</div>` : ""}
@@ -3018,6 +3458,7 @@
     el.ovTitle.textContent = l.title || "Untitled";
     const b = buildingOf(l);
     el.ovLoc.textContent = [b && b.name, l.neighborhood, l.district].filter(Boolean).join(" · ") || (l.city || "Bangkok");
+    if (el.ovStation) el.ovStation.innerHTML = stationHtml(l);
     el.ovMeta.textContent = metaParts(l).join(" · ");
     el.overlay.classList.add("open");
   }
@@ -3055,6 +3496,8 @@
     else if (l.bedrooms != null) rows.push(factRow("Bedrooms", String(l.bedrooms)));
     if (l.bathrooms != null) rows.push(factRow("Bathrooms", String(l.bathrooms)));
     if (l.size_sqm != null) rows.push(factRow("Size", `${l.size_sqm} sqm`));
+    const station = stationHtml(l);
+    if (station) rows.push(factRow("Nearest station", stationPhrase(l._near.any), { html: station }));
     if (l.pet_friendly === true) rows.push(factRow("Pets", "Pet friendly"));
     else if (l.pet_friendly === false) rows.push(factRow("Pets", "Not pet friendly"));
     const furnishLabel = { fully: "Fully furnished", partly: "Partly furnished", unfurnished: "Unfurnished" };
@@ -3164,6 +3607,7 @@
               ${statusText ? `<span class="status-pill${statusClass}">${esc(statusText)}</span>` : ""}
             </div>
             ${specs ? `<div class="detail-specs">${esc(specs)}</div>` : ""}
+            ${stationHtml(l) ? `<div class="detail-station">${stationHtml(l)}</div>` : ""}
             <div class="facts">${detailFacts(l)}</div>
             ${notes ? `<div class="detail-notes"><h3>Notes</h3>${esc(notes)}</div>` : ""}
           </div>
@@ -3373,17 +3817,52 @@
 
   let urlReady = false;
 
+  function isNarrow() {
+    return window.matchMedia("(max-width: 820px)").matches;
+  }
+
   function setMoreOpen(open) {
     el.more.classList.toggle("open", open);
+    const sheet = open && isNarrow();
+    if (el.sheetBackdrop) el.sheetBackdrop.hidden = !sheet;
+    document.body.classList.toggle("sheet-open", sheet);
     syncMoreLabel();
+  }
+
+  function sheetFilterCount() {
+    let n = 0;
+    if (el.near.value) n += 1;
+    if (selectedLineIds().length) n += 1;
+    if (el.sizeMin.value !== "") n += 1;
+    if (el.sizeMax.value !== "") n += 1;
+    if (el.baths.value) n += 1;
+    if (el.zone.value) n += 1;
+    if (el.pets.checked) n += 1;
+    if (el.furnish.value) n += 1;
+    return n;
+  }
+
+  function activeFilterCount() {
+    let n = sheetFilterCount();
+    if (el.q.value.trim()) n += 1;
+    if (el.priceMin.value !== "") n += 1;
+    if (el.priceMax.value !== "") n += 1;
+    if (el.beds.value) n += 1;
+    if (el.ptype.value) n += 1;
+    return n;
   }
 
   function syncMoreLabel() {
     const open = el.more.classList.contains("open");
-    const n = (el.pets.checked ? 1 : 0) + (el.furnish.value ? 1 : 0);
-    el.moreBtn.classList.toggle("active", open || n > 0);
+    const sheetCount = sheetFilterCount();
+    const active = activeFilterCount();
+    el.moreBtn.classList.toggle("active", open || sheetCount > 0);
     el.moreBtn.setAttribute("aria-expanded", open ? "true" : "false");
-    el.moreBtn.textContent = n ? `More filters (${n})` : "More filters";
+    el.moreBtn.textContent = sheetCount ? `More filters (${sheetCount})` : "More filters";
+    if (el.activeCount) {
+      el.activeCount.hidden = active === 0;
+      el.activeCount.textContent = active === 1 ? "1 filter" : `${active} filters`;
+    }
   }
 
   function applyUrlFilters() {
@@ -3407,7 +3886,33 @@
     if (trains === "0" || trains === "off" || trains === "false") el.trains.checked = false;
     const furnish = p.get("furnish");
     if (["fully", "partly", "unfurnished"].includes(furnish)) el.furnish.value = furnish;
-    if (el.pets.checked || el.furnish.value) setMoreOpen(true);
+    const near = p.get("near");
+    if (["500", "1000", "2000"].includes(near)) el.near.value = near;
+    const lines = (p.get("lines") || "").split(",").map((id) => id.trim()).filter(Boolean);
+    if (lines.length && el.linePicks) {
+      el.linePicks.querySelectorAll("input").forEach((input) => {
+        input.checked = lines.includes(input.value);
+      });
+    }
+    const smin = readBound(p.get("smin"));
+    const smax = readBound(p.get("smax"));
+    if (smin !== "") el.sizeMin.value = smin;
+    if (smax !== "") el.sizeMax.value = smax;
+    const baths = p.get("baths");
+    if (["1", "2", "3"].includes(baths)) el.baths.value = baths;
+    const zone = p.get("zone");
+    if (zone && [...el.zone.options].some((option) => option.value === zone)) el.zone.value = zone;
+    const sort = p.get("sort");
+    if (["new", "price-asc", "price-desc", "size", "station"].includes(sort)) el.sort.value = sort;
+    if (sheetFilterCount() && !isNarrow()) setMoreOpen(true);
+    else syncMoreLabel();
+  }
+
+  function readBound(raw) {
+    if (raw == null || String(raw).trim() === "") return "";
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n < 0) return "";
+    return String(n);
   }
 
   function fitListingPoints(list) {
@@ -3438,6 +3943,14 @@
     if (el.ptype.value) p.set("type", el.ptype.value);
     if (el.pets.checked) p.set("pets", "1");
     if (el.furnish.value) p.set("furnish", el.furnish.value);
+    if (el.near.value) p.set("near", el.near.value);
+    const lines = selectedLineIds();
+    if (lines.length) p.set("lines", lines.join(","));
+    if (el.sizeMin.value !== "") p.set("smin", el.sizeMin.value);
+    if (el.sizeMax.value !== "") p.set("smax", el.sizeMax.value);
+    if (el.baths.value) p.set("baths", el.baths.value);
+    if (el.zone.value) p.set("zone", el.zone.value);
+    if (el.sort.value && el.sort.value !== "new") p.set("sort", el.sort.value);
     if (!el.trains.checked) p.set("trains", "0");
     if (detailListing) p.set("listing", detailListing.id);
     const qs = p.toString();
@@ -3598,6 +4111,11 @@
       closeDrawer();
       return;
     }
+    if (el.more.classList.contains("open") && isNarrow() && e.key === "Escape") {
+      e.preventDefault();
+      setMoreOpen(false);
+      return;
+    }
     const typing = e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
     if (!el.detail.hidden && !typing && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
       const photos = detailListing ? photoList(detailListing) : [];
@@ -3610,6 +4128,11 @@
   }, true);
 
   window.addEventListener("resize", () => {
+    if (el.more.classList.contains("open")) {
+      const sheet = isNarrow();
+      if (el.sheetBackdrop) el.sheetBackdrop.hidden = !sheet;
+      document.body.classList.toggle("sheet-open", sheet);
+    }
     if (el.detail.hidden) return;
     const track = el.detail.querySelector(".gallery-track");
     if (!track || !track.clientWidth) return;
@@ -3659,16 +4182,19 @@
   });
 
   ["input", "change"].forEach((ev) => {
-    [el.priceMin, el.priceMax, el.beds, el.ptype, el.furnish].forEach((node) => {
+    [el.priceMin, el.priceMax, el.beds, el.ptype, el.furnish, el.near, el.sizeMin, el.sizeMax, el.baths, el.zone, el.sort].forEach((node) => {
       node.addEventListener(ev, () => refresh());
     });
   });
   el.pets.addEventListener("change", () => refresh());
+  el.linePicks.addEventListener("change", () => refresh());
   el.trains.addEventListener("change", () => {
     applyTransitVisibility();
     if (urlReady) writeFiltersToUrl();
   });
   el.moreBtn.addEventListener("click", () => setMoreOpen(!el.more.classList.contains("open")));
+  el.sheetDone.addEventListener("click", () => setMoreOpen(false));
+  el.sheetBackdrop.addEventListener("click", () => setMoreOpen(false));
   el.searchAsMove.addEventListener("change", () => refresh());
   el.reset.addEventListener("click", () => {
     el.priceMin.value = "";
@@ -3677,6 +4203,13 @@
     el.ptype.value = "";
     el.pets.checked = false;
     el.furnish.value = "";
+    el.near.value = "";
+    el.sizeMin.value = "";
+    el.sizeMax.value = "";
+    el.baths.value = "";
+    el.zone.value = "";
+    el.sort.value = "new";
+    el.linePicks.querySelectorAll("input").forEach((input) => { input.checked = false; });
     el.searchAsMove.checked = false;
     el.trains.checked = true;
     applyTransitVisibility();
@@ -3799,7 +4332,6 @@
   }
 
   const boot = (listings, directory) => {
-    if (!shortlistMode) applyUrlFilters();
     loadStoredShortlist();
     loadStoredAgent();
     document.body.classList.toggle("mode-shortlist", shortlistMode);
@@ -3821,10 +4353,50 @@
     AREA_LABEL.ekamai = "Ekamai";
     renderHeader(areas);
     areaBbox = directory && directory.area ? directory.area.bbox : null;
+    allListings.forEach((listing, index) => { listing._i = index; });
+    fillZoneSelect(areas);
+    assignNearestStations();
+    if (!shortlistMode) applyUrlFilters();
     urlReady = true;
     fitAreaSoon();
     paintHearts();
   };
+
+  function fillZoneSelect(areas) {
+    const used = new Set();
+    allListings.forEach((listing) => {
+      const building = buildingOf(listing);
+      (building && building.areas || []).forEach((id) => used.add(id));
+    });
+    const groups = new Map([
+      ["Sukhumvit", []],
+      ["Other areas", []],
+      ["Chao Phraya Riverside", []],
+    ]);
+    const seen = new Set();
+    (areas || []).forEach((area) => {
+      if (!area || !area.id || !used.has(area.id) || seen.has(area.id)) return;
+      seen.add(area.id);
+      const key = area.corridor === "chao-phraya"
+        ? "Chao Phraya Riverside"
+        : (area.corridor === "sukhumvit" ? "Sukhumvit" : "Other areas");
+      groups.get(key).push({ id: area.id, name: area.name || AREA_LABEL[area.id] || area.id });
+    });
+    used.forEach((id) => {
+      if (seen.has(id)) return;
+      groups.get("Other areas").push({ id, name: AREA_LABEL[id] || id });
+    });
+    const html = [`<option value="">Any zone</option>`];
+    groups.forEach((list, name) => {
+      if (!list.length) return;
+      html.push(`<optgroup label="${esc(name)}">`);
+      list.forEach((area) => html.push(`<option value="${esc(area.id)}">${esc(area.name)}</option>`));
+      html.push(`</optgroup>`);
+    });
+    const prev = el.zone.value;
+    el.zone.innerHTML = html.join("");
+    if (prev && [...el.zone.options].some((option) => option.value === prev)) el.zone.value = prev;
+  }
 
   const loadJson = (url) => fetch(url).then((r) => {
     if (!r.ok) throw new Error("HTTP " + r.status + " " + url);
@@ -3832,6 +4404,7 @@
   });
 
   const bootAll = (listings, directory, lines, stations) => {
+    indexStations(stations, lines);
     boot(listings, directory);
     if (lines && stations) addTransit(lines, stations);
   };
